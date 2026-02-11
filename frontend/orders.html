@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Orders</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="container">
+  <h2>Orders (admin only)</h2>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="login.html">Login</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+
+  <p id="msg"></p>
+  <ul id="orders"></ul>
+</div>
+
+<script>
+  const API = 'http://localhost:3000';
+
+  async function loadOrders() {
+    const me = await fetch(API + '/api/auth/me', { credentials: 'include' }).then(r => r.json());
+    if (!me.loggedIn) {
+      document.getElementById('msg').textContent = 'Please login first.';
+      return;
+    }
+    if (me.role !== 'admin') {
+      document.getElementById('msg').textContent = 'Only admin can view all orders.';
+      return;
+    }
+
+    fetch(API + '/api/orders', { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => {
+              const list = document.getElementById('orders');
+              list.innerHTML = '';
+              data.forEach(o => {
+                const li = document.createElement('li');
+                li.textContent = `Order by ${o.user} | total: $${o.total} | items: ${o.items?.length || 0}`;
+                list.appendChild(li);
+              });
+            });
+  }
+
+  loadOrders().catch(() => {
+    document.getElementById('msg').textContent = 'Failed to load. Is backend running?';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="container">
+  <h2>Admin Panel</h2>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="orders.html">Orders</a>
+    <a href="login.html">Login</a>
+  </nav>
+
+  <p id="status"></p>
+
+  <button onclick="loadSalesByCategory()">Sales by Category</button>
+  <button onclick="loadTopProducts()">Top Products</button>
+  <button onclick="loadMonthlyRevenue()">Monthly Revenue</button>
+
+  <pre id="result"></pre>
+</div>
+
+<script>
+  const API = 'http://localhost:3000/api';
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const token = localStorage.getItem("token");
+
+  if (!user || user.role !== "admin" || !token) location.href = "login.html";
+
+  document.getElementById('status').textContent = `Logged in as admin (${user.username || user.name || 'admin'})`;
+
+  async function apiGet(path) {
+    const res = await fetch(API + path, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || "Request failed");
+    return data;
+  }
+
+  async function loadSalesByCategory() {
+    const data = await apiGet('/analytics/sales-by-category');
+    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+  }
+
+  async function loadTopProducts() {
+    const data = await apiGet('/analytics/top-products?limit=5');
+    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+  }
+
+  async function loadMonthlyRevenue() {
+    const data = await apiGet('/analytics/monthly-revenue');
+    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+  }
+</script>
+</body>
+</html>

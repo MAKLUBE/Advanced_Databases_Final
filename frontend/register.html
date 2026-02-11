@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register</title>
+</head>
+<body>
+  <h2>Register</h2>
+  <input id="username" placeholder="username">
+  <input id="password" placeholder="password">
+  <button onclick="register()">Register</button>
+
+  <script>
+    function register() {
+      fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          username: username.value,
+          password: password.value
+        })
+      });
+    }
+  </script>
+</body>
+</html>
