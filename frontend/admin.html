@@ -1,30 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-<div class="container">
-  <h2>Admin Panel</h2>
-
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="products.html">Products</a>
-    <a href="orders.html">Orders</a>
-    <a href="login.html">Login</a>
-  </nav>
-
-  <p id="status"></p>
-
-  <button onclick="loadSalesByCategory()">Sales by Category</button>
-  <button onclick="loadTopProducts()">Top Products</button>
-  <button onclick="loadMonthlyRevenue()">Monthly Revenue</button>
-
-  <pre id="result"></pre>
-</div>
-
 <script>
   const API = 'http://localhost:3000/api';
 
@@ -48,6 +21,18 @@
     return data;
   }
 
+  async function apiSend(path, method, body) {
+    const res = await fetch(API + path, {
+      method,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  }
+
   async function loadSalesByCategory() {
     const data = await apiGet('/analytics/sales-by-category');
     document.getElementById('result').textContent = JSON.stringify(data, null, 2);
@@ -63,9 +48,105 @@
     document.getElementById('result').textContent = JSON.stringify(data, null, 2);
   }
 
-  checkAdmin().catch(() => {
-    document.getElementById('status').textContent = 'Failed to verify session. Please login again.';
+  async function loadProductRefs() {
+    const [categories, suppliers] = await Promise.all([
+      apiGet('/categories'),
+      apiGet('/suppliers')
+    ]);
+
+    const catEl = document.getElementById('pCategory');
+    const supEl = document.getElementById('pSupplier');
+
+    catEl.innerHTML = categories.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+    supEl.innerHTML = suppliers.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+  }
+
+  async function createProduct() {
+    const msg = document.getElementById('crudMsg');
+    msg.textContent = '';
+
+    try {
+      await apiSend('/products', 'POST', {
+        name: document.getElementById('pName').value.trim(),
+        price: Number(document.getElementById('pPrice').value),
+        stock: Number(document.getElementById('pStock').value),
+        category: document.getElementById('pCategory').value,
+        supplier: document.getElementById('pSupplier').value
+      });
+
+      document.getElementById('pName').value = '';
+      document.getElementById('pPrice').value = '';
+      document.getElementById('pStock').value = '';
+      msg.textContent = 'Product created.';
+      await loadProducts();
+    } catch (e) {
+      msg.textContent = e.message;
+    }
+  }
+
+  async function loadProducts() {
+    const list = document.getElementById('productList');
+    const data = await apiGet('/products?limit=200');
+    const items = data.items || [];
+
+    list.innerHTML = '';
+    items.forEach(p => {
+      const li = document.createElement('li');
+      const cat = p.category?.name || '-';
+      const sup = p.supplier?.name || '-';
+      li.innerHTML = `
+        <strong>${p.name}</strong> | $${p.price} | stock: ${p.stock} | ${cat} | ${sup}
+        <button data-action="edit">Edit</button>
+        <button data-action="delete">Delete</button>
+      `;
+
+      li.querySelector('[data-action="edit"]').onclick = async () => {
+        const newName = prompt('New product name:', p.name);
+        if (newName === null) return;
+
+        const newPrice = prompt('New price:', p.price);
+        if (newPrice === null) return;
+
+        const newStock = prompt('New stock:', p.stock);
+        if (newStock === null) return;
+
+        try {
+          await apiSend('/products/' + p._id, 'PUT', {
+            name: newName.trim(),
+            price: Number(newPrice),
+            stock: Number(newStock),
+            category: p.category?._id || p.category,
+            supplier: p.supplier?._id || p.supplier
+          });
+          document.getElementById('crudMsg').textContent = 'Product updated.';
+          await loadProducts();
+        } catch (e) {
+          document.getElementById('crudMsg').textContent = e.message;
+        }
+      };
+
+      li.querySelector('[data-action="delete"]').onclick = async () => {
+        if (!confirm('Delete this product?')) return;
+        try {
+          await apiSend('/products/' + p._id, 'DELETE');
+          document.getElementById('crudMsg').textContent = 'Product deleted.';
+          await loadProducts();
+        } catch (e) {
+          document.getElementById('crudMsg').textContent = e.message;
+        }
+      };
+
+      list.appendChild(li);
+    });
+  }
+
+  async function init() {
+    await checkAdmin();
+    await loadProductRefs();
+    await loadProducts();
+  }
+
+  init().catch(() => {
+    document.getElementById('status').textContent = 'Failed to initialize admin panel. Please login again.';
   });
 </script>
-</body>
-</html>
