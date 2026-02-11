@@ -31,6 +31,16 @@ npm start
 Backend runs on:
 - http://localhost:3000
 
+
+### Backend environment file
+Create `backend/.env` (you can copy from `.env.example`) with:
+
+```env
+MONGO_URI=mongodb://127.0.0.1:27017/sports_store
+SESSION_SECRET=change-me
+PORT=3000
+```
+
 ### Frontend
 Open **frontend** folder with any static server on port **5500** (important because of CORS):
 
