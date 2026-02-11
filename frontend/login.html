@@ -17,19 +17,40 @@
     <input id="password" type="password" placeholder="Password">
 
     <button onclick="login()">Login</button>
+    <p id="msg"></p>
   </div>
 
   <script>
-    function login() {
-      fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          username: username.value,
-          password: password.value
-        })
-      });
+    async function login() {
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+
+      try {
+        const res = await fetch('http://localhost:3000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            username: username.value,
+            password: password.value
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          msg.textContent = data.message || 'Login failed';
+          return;
+        }
+
+        if (data.user && data.user.role === 'admin') {
+          location.href = 'admin.html';
+          return;
+        }
+
+        location.href = 'products.html';
+      } catch {
+        msg.textContent = 'Cannot connect to backend. Is it running?';
+      }
     }
   </script>
 </body>

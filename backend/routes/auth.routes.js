@@ -14,18 +14,39 @@ router.post('/login', async (req, res, next) => {
     req.session.role = user.role || 'customer';
     req.session.username = user.username;
 
-    res.json({ message: 'Logged in', role: req.session.role, username: user.username });
-  } catch (e) { next(e); }
+    res.json({
+      message: 'Logged in',
+      user: {
+        id: user._id,
+        username: user.username,
+        role: req.session.role
+      }
+    });
+  } catch (e) {
+    next(e);
+  }
 });
 
 router.get('/me', (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.json({ loggedIn: false });
   }
-  res.json({ loggedIn: true, role: req.session.role, username: req.session.username });
+
+  res.json({
+    loggedIn: true,
+    user: {
+      id: req.session.userId,
+      username: req.session.username,
+      role: req.session.role
+    }
+  });
 });
 
 router.post('/logout', (req, res) => {
+  if (!req.session) {
+    return res.json({ message: 'Logged out' });
+  }
+
   req.session.destroy(() => {
     res.json({ message: 'Logged out' });
   });
@@ -38,8 +59,17 @@ router.post('/register', async (req, res, next) => {
     if (exists) return res.status(400).json({ message: 'Username already exists' });
 
     const user = await User.create({ username, password, role: 'customer' });
-    res.json(user);
-  } catch (e) { next(e); }
+    res.json({
+      message: 'Registered',
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      }
+    });
+  } catch (e) {
+    next(e);
+  }
 });
 
 module.exports = router;

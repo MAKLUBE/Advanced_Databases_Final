@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 
 exports.createOrder = async (req, res, next) => {
   try {
-    const { items, user } = req.body;
+    const { items } = req.body;
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: 'Order items are required' });
     }
@@ -26,7 +26,7 @@ exports.createOrder = async (req, res, next) => {
       );
     }
 
-    const order = await Order.create({ user, items, total });
+    const order = await Order.create({ user: req.session.userId, items, total });
     res.json(order);
   } catch (e) { next(e); }
 };
