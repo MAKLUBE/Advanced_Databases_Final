@@ -29,7 +29,7 @@
       document.getElementById('msg').textContent = 'Please login first.';
       return;
     }
-    if (me.role !== 'admin') {
+    if (!me.user || me.user.role !== 'admin') {
       document.getElementById('msg').textContent = 'Only admin can view all orders.';
       return;
     }
