@@ -1,0 +1,23 @@
+<%- include('../partials/header') %>
+<h2>Products</h2>
+<form method="get" action="/products">
+  <label>Filter by category</label>
+  <select name="category">
+    <option value="">All</option>
+    <option value="sportswear">Sportswear</option>
+    <option value="training">Training</option>
+    <option value="recovery">Recovery</option>
+    <option value="nutrition">Nutrition</option>
+  </select>
+  <button>Apply filter</button>
+</form>
+<div class="grid">
+  <% products.forEach((p) => { %>
+    <div class="card">
+      <span class="badge"><%= p.subCategory %></span>
+      <h3><a href="/products/<%= p._id %>"><%= p.name %></a></h3>
+      <p>$<%= p.price.toFixed(2) %> | Stock: <%= p.stock %></p>
+    </div>
+  <% }) %>
+</div>
+<%- include('../partials/footer') %>

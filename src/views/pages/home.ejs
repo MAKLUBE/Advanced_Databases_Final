@@ -1,0 +1,13 @@
+<%- include('../partials/header') %>
+<h2>Welcome to sportsGoodsStore</h2>
+<p>Categories: Sportswear, Training Equipment, Recovery, Nutrition.</p>
+<div class="grid">
+  <% featured.forEach((p) => { %>
+    <div class="card">
+      <span class="badge"><%= p.category %></span>
+      <h3><a href="/products/<%= p._id %>"><%= p.name %></a></h3>
+      <p>$<%= p.price.toFixed(2) %></p>
+    </div>
+  <% }) %>
+</div>
+<%- include('../partials/footer') %>
