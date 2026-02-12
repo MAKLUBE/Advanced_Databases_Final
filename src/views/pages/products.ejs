@@ -3,12 +3,21 @@
 <form method="get" action="/products">
   <label>Filter by category</label>
   <select name="category">
-    <option value="">All</option>
-    <option value="sportswear">Sportswear</option>
-    <option value="training">Training</option>
-    <option value="recovery">Recovery</option>
-    <option value="nutrition">Nutrition</option>
+    <option value="" <%= !category ? 'selected' : '' %>>All</option>
+    <option value="sportswear" <%= category === 'sportswear' ? 'selected' : '' %>>Sportswear</option>
+    <option value="training" <%= category === 'training' ? 'selected' : '' %>>Training</option>
+    <option value="recovery" <%= category === 'recovery' ? 'selected' : '' %>>Recovery</option>
+    <option value="nutrition" <%= category === 'nutrition' ? 'selected' : '' %>>Nutrition</option>
   </select>
+
+  <label>Sort</label>
+  <select name="sort">
+    <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
+    <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest</option>
+    <option value="price-asc" <%= sort === 'price-asc' ? 'selected' : '' %>>Price: low to high</option>
+    <option value="price-desc" <%= sort === 'price-desc' ? 'selected' : '' %>>Price: high to low</option>
+  </select>
+
   <button>Apply filter</button>
 </form>
 
@@ -55,6 +64,18 @@
       <% } %>
     </div>
   <% }) %>
+</div>
+
+<div class="card">
+  <p>Page <%= pagination.page %> of <%= pagination.pages %></p>
+  <div>
+    <% if (pagination.page > 1) { %>
+      <a href="/products?category=<%= category || '' %>&sort=<%= sort %>&page=<%= pagination.page - 1 %>">← Prev</a>
+    <% } %>
+    <% if (pagination.page < pagination.pages) { %>
+      <a href="/products?category=<%= category || '' %>&sort=<%= sort %>&page=<%= pagination.page + 1 %>">Next →</a>
+    <% } %>
+  </div>
 </div>
 
 <% if (session && session.role === 'admin') { %>
@@ -121,7 +142,4 @@
 </script>
 <% } %>
 
-    </div>
-  <% }) %>
-</div>
 <%- include('../partials/footer') %>

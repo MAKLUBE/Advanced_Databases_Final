@@ -18,9 +18,8 @@
   </div>
 <% }) %>
 
-    <p>Qty: <%= item.quantity %> | Price: $<%= item.product.price.toFixed(2) %></p>
-  </div>
-<% }) %>
+<div class="card"><strong>Cart total: $<%= cartTotal.toFixed(2) %></strong></div>
+
 <form id="checkout-form">
   <h3>Shipping Address</h3>
   <input name="city" placeholder="City" required />
@@ -68,7 +67,6 @@
     });
   });
 
-<script>
   document.getElementById('checkout-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);

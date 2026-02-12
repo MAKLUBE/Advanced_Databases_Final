@@ -1,7 +1,24 @@
 require('dotenv').config();
-const connectDB = require('../config/db');
-const User = require('../models/User');
-const Product = require('../models/Product');
+const path = require('path');
+const fs = require('fs');
+
+function safeRequire(candidates, label) {
+  for (const relPath of candidates) {
+    const absolute = path.resolve(__dirname, relPath);
+    if (fs.existsSync(absolute) || fs.existsSync(`${absolute}.js`)) {
+      return require(absolute);
+    }
+  }
+
+  const tried = candidates.map((p) => path.resolve(__dirname, p)).join('\n- ');
+  throw new Error(
+    `Cannot resolve ${label}. Please verify your project structure and run from repository root.\nTried:\n- ${tried}`
+  );
+}
+
+const connectDB = safeRequire(['../config/db', '../../src/config/db', '../../config/db'], 'database config module');
+const User = safeRequire(['../models/User', '../../src/models/User', '../../models/User'], 'User model');
+const Product = safeRequire(['../models/Product', '../../src/models/Product', '../../models/Product'], 'Product model');
 
 const products = [
   { name: 'MMA Compression Shirt', category: 'sportswear', sportType: 'MMA', subCategory: 'Combat sports', price: 35, stock: 40, description: 'Breathable shirt for MMA training.' },
@@ -35,6 +52,6 @@ async function run() {
 }
 
 run().catch((error) => {
-  console.error(error);
+  console.error(error.message || error);
   process.exit(1);
 });

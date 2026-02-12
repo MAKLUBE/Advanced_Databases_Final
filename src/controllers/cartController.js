@@ -36,12 +36,6 @@ async function addCartItem(req, res) {
     existing.quantity += parsedQuantity;
   } else {
     cart.items.push({ product: productId, quantity: parsedQuantity });
-  const existing = cart.items.find((item) => item.product.toString() === productId);
-
-  if (existing) {
-    existing.quantity += Number(quantity);
-  } else {
-    cart.items.push({ product: productId, quantity: Number(quantity) });
   }
 
   await cart.save();
@@ -63,12 +57,6 @@ async function updateCartItem(req, res) {
   if (!target) return res.status(404).json({ message: 'Cart item not found' });
 
   target.quantity = parsedQuantity;
-  const cart = await getOrCreateCart(req.session.userId);
-
-  const target = cart.items.find((item) => item.product.toString() === req.params.productId);
-  if (!target) return res.status(404).json({ message: 'Cart item not found' });
-
-  target.quantity = Number(quantity);
   await cart.save();
   await cart.populate('items.product');
   res.json(cart);
@@ -84,7 +72,6 @@ async function removeCartItem(req, res) {
     return res.status(404).json({ message: 'Cart item not found' });
   }
 
-  cart.items = cart.items.filter((item) => item.product.toString() !== req.params.productId);
   await cart.save();
   await cart.populate('items.product');
   res.json(cart);
