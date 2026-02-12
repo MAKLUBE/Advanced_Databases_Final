@@ -1,0 +1,40 @@
+<%- include('../partials/header') %>
+<h2>Your Cart</h2>
+<% if (!cart.items.length) { %>
+  <p class="alert">Your cart is empty.</p>
+<% } %>
+<% cart.items.forEach((item) => { %>
+  <div class="card">
+    <h4><%= item.product.name %></h4>
+    <p>Qty: <%= item.quantity %> | Price: $<%= item.product.price.toFixed(2) %></p>
+  </div>
+<% }) %>
+<form id="checkout-form">
+  <h3>Shipping Address</h3>
+  <input name="city" placeholder="City" required />
+  <input name="street" placeholder="Street" required />
+  <input name="postalCode" placeholder="Postal Code" required />
+  <button>Place Order</button>
+</form>
+<script>
+  document.getElementById('checkout-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const shippingAddress = Object.fromEntries(formData.entries());
+
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shippingAddress })
+    });
+
+    if (response.ok) {
+      alert('Order placed successfully.');
+      window.location.href = '/dashboard';
+    } else {
+      const json = await response.json();
+      alert(json.message || 'Could not place order');
+    }
+  });
+</script>
+<%- include('../partials/footer') %>
