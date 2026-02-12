@@ -136,22 +136,6 @@ npm start
 ```
 
 
-### Troubleshooting `npm run dev` port errors (`EADDRINUSE`)
-
-If you see `Error: listen EADDRINUSE: address already in use :::3000`, another process is already using that port.
-
-This project now auto-retries on the next ports (`3001`, `3002`, ... up to `MAX_PORT_ATTEMPTS`).
-
-You can also set a fixed port in `.env`:
-```env
-PORT=4000
-```
-
-Optional:
-```env
-MAX_PORT_ATTEMPTS=20
-```
-
 ### Troubleshooting `npm run seed` (Windows path/module errors)
 
 If you see errors like:
