@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+<div class="card">
+  <h2><%= product.name %></h2>
+  <p><strong>Category:</strong> <%= product.category %></p>
+  <p><strong>Subcategory:</strong> <%= product.subCategory %></p>
+  <p><%= product.description %></p>
+  <p><strong>Price:</strong> $<%= product.price.toFixed(2) %></p>
+  <form id="add-to-cart-form">
+    <input type="hidden" name="productId" value="<%= product._id %>" />
+    <label>Quantity</label>
+    <input type="number" name="quantity" min="1" value="1" />
+    <button type="submit">Add to cart</button>
+  </form>
+</div>
+<script>
+  document.getElementById('add-to-cart-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const payload = Object.fromEntries(formData.entries());
+    payload.quantity = Number(payload.quantity);
+
+    const response = await fetch('/api/cart/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      window.location.href = '/cart';
+    } else {
+      alert('You need to login before adding to cart.');
+      window.location.href = '/login';
+    }
+  });
+</script>
+<%- include('../partials/footer') %>

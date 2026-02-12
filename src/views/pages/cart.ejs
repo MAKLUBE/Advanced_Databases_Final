@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+<h2>Your Cart</h2>
+<% if (!cart.items.length) { %>
+  <p class="alert">Your cart is empty.</p>
+<% } %>
+<% cart.items.forEach((item) => { %>
+  <div class="card">
+    <h4><%= item.product.name %></h4>
+    <p>Price: $<%= item.product.price.toFixed(2) %></p>
+
+    <form class="update-cart-form" data-product-id="<%= item.product._id %>">
+      <label>Quantity</label>
+      <input type="number" name="quantity" min="1" value="<%= item.quantity %>" />
+      <button type="submit">Update quantity</button>
+    </form>
+
+    <button class="remove-cart-item secondary" data-product-id="<%= item.product._id %>">Remove from cart</button>
+  </div>
+<% }) %>
+
+<form id="checkout-form">
+  <h3>Shipping Address</h3>
+  <input name="city" placeholder="City" required />
+  <input name="street" placeholder="Street" required />
+  <input name="postalCode" placeholder="Postal Code" required />
+  <button>Place Order</button>
+</form>
+
+<script>
+  document.querySelectorAll('.update-cart-form').forEach((form) => {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const productId = form.dataset.productId;
+      const quantity = Number(new FormData(form).get('quantity'));
+
+      const response = await fetch(`/api/cart/items/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity })
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const json = await response.json();
+        alert(json.message || 'Could not update cart item');
+      }
+    });
+  });
+
+  document.querySelectorAll('.remove-cart-item').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const productId = button.dataset.productId;
+
+      const response = await fetch(`/api/cart/items/${productId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const json = await response.json();
+        alert(json.message || 'Could not remove item from cart');
+      }
+    });
+  });
+
+  document.getElementById('checkout-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const shippingAddress = Object.fromEntries(formData.entries());
+
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shippingAddress })
+    });
+
+    if (response.ok) {
+      alert('Order placed successfully.');
+      window.location.href = '/dashboard';
+    } else {
+      const json = await response.json();
+      alert(json.message || 'Could not place order');
+    }
+  });
+</script>
+<%- include('../partials/footer') %>

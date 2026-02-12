@@ -1,0 +1,18 @@
+<%- include('../partials/header') %>
+<h2>My Dashboard</h2>
+<p>Recent Orders</p>
+<% if (!orders.length) { %><p class="alert">No orders yet.</p><% } %>
+<table class="table">
+  <thead><tr><th>Order ID</th><th>Status</th><th>Total</th><th>Date</th></tr></thead>
+  <tbody>
+    <% orders.forEach((o) => { %>
+      <tr>
+        <td><%= o._id %></td>
+        <td><%= o.status %></td>
+        <td>$<%= o.totalAmount.toFixed(2) %></td>
+        <td><%= o.createdAt.toISOString().slice(0, 10) %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('../partials/footer') %>
