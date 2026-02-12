@@ -95,6 +95,20 @@ cp .env.example .env
 
 Edit `.env` if needed.
 
+### Important `.env` fields explained
+
+- `SESSION_SECRET`:
+  - This is a private random string used to sign and protect the session cookie (`connect.sid`).
+  - Example value: `SESSION_SECRET=8f04c970f14d4fd18d10268a386f67db`
+  - Do **not** share it publicly (never commit real secrets to Git).
+
+- `MONGO_URI`:
+  - Connection string for your MongoDB database.
+  - Local MongoDB example:
+    `MONGO_URI=mongodb://127.0.0.1:27017/sportsGoodsStore`
+  - MongoDB Atlas example:
+    `MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/sportsGoodsStore?retryWrites=true&w=majority`
+
 ### Run seeded data + admin user
 ```bash
 npm run seed
@@ -108,6 +122,13 @@ Creates products and admin account from `.env`:
 npm run dev
 ```
 Open: `http://localhost:3000`
+
+### How MongoDB is connected in this project
+
+1. App startup (`src/server.js`) loads `.env` and calls the DB connector.
+2. `src/config/db.js` reads `MONGO_URI` and calls `mongoose.connect(...)`.
+3. If DB connection is successful, the app starts listening on your `PORT`.
+4. Session data is saved to MongoDB in `sessions` collection by `connect-mongo`.
 
 ### Production start
 ```bash
@@ -138,6 +159,16 @@ npm start
 - Optional first collection: `users`
 
 Everything else is created by app logic and seed script.
+
+### If you want to make a user admin in Compass
+
+By default, a newly registered user has role `customer`.
+
+1. Open `sportsGoodsStore` → `users`
+2. Find your user document by email
+3. Edit field `role` from `customer` to `admin`
+4. Save changes
+5. Log out and log in again (session will refresh with new role)
 
 ---
 
@@ -212,3 +243,25 @@ src/
   - `SKIP_DB=true`
 - For real final project defense, keep `SKIP_DB=false`.
 
+---
+
+## 9) What happens when you register a new user?
+
+When you register (`POST /api/auth/register`):
+
+1. A new document is created in `users`.
+2. Password is hashed (`passwordHash`) before saving.
+3. Default role is `customer`.
+4. Session is created automatically, so you are logged in right away.
+
+### Can a registered user create new items/products?
+
+- **Customer user:**
+  - Can browse products, add to cart, place orders, view own orders.
+  - **Cannot** create/update/delete products.
+
+- **Admin user only:**
+  - Can call `POST/PATCH/DELETE /api/products`.
+  - Can manage orders in admin routes.
+
+So yes, product/item creation exists, but it is intentionally restricted to `admin` role.
