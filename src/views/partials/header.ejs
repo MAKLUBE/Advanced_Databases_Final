@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sportsGoodsStore</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+<header>
+  <h1>sportsGoodsStore</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/products">Products</a>
+    <a href="/cart">Cart</a>
+    <% if (session && session.userId) { %>
+      <a href="/dashboard">Dashboard</a>
+      <% if (session.role === 'admin') { %><a href="/admin/orders">Admin Orders</a><% } %>
+      <form class="inline" action="/api/auth/logout" method="post"><button class="secondary inline">Logout</button></form>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    <% } %>
+  </nav>
+</header>
+<main>

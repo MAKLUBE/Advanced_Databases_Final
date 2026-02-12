@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+<h2>Admin: All Orders</h2>
+<table class="table">
+  <thead><tr><th>User</th><th>Total</th><th>Status</th><th>Update</th></tr></thead>
+  <tbody>
+    <% orders.forEach((o) => { %>
+      <tr>
+        <td><%= o.user?.email || 'n/a' %></td>
+        <td>$<%= o.totalAmount.toFixed(2) %></td>
+        <td><%= o.status %></td>
+        <td>
+          <form class="status-form" data-id="<%= o._id %>">
+            <select name="status">
+              <option>placed</option><option>paid</option><option>shipped</option><option>completed</option><option>cancelled</option>
+            </select>
+            <button>Save</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<script>
+  document.querySelectorAll('.status-form').forEach((form) => {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const orderId = form.dataset.id;
+      const status = form.querySelector('[name="status"]').value;
+      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (response.ok) window.location.reload();
+      else alert('Failed to update status.');
+    });
+  });
+</script>
+<%- include('../partials/footer') %>
