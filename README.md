@@ -135,6 +135,41 @@ Open: `http://localhost:3000`
 npm start
 ```
 
+
+### Troubleshooting `npm run seed` (Windows path/module errors)
+
+If you see errors like:
+- `Cannot find module '.../src/scripts/seed.js'`
+- `Cannot find module '../config/db'`
+
+check these steps:
+
+1. Make sure you are in the project root (same folder as `package.json`):
+   ```powershell
+   pwd
+   dir
+   ```
+2. Verify structure exists:
+   ```powershell
+   dir src
+   dir src\config
+   dir src\models
+   dir src\scripts
+   ```
+3. Confirm script in `package.json`:
+   - `"seed": "node src/scripts/seed.js"`
+4. If you renamed folders manually (`scipts` → `scripts`), ensure **all** expected folders/files are still present:
+   - `src/config/db.js`
+   - `src/models/User.js`
+   - `src/models/Product.js`
+5. Reinstall dependencies then run seed again:
+   ```powershell
+   npm install
+   npm run seed
+   ```
+
+The seed script now includes path checks and prints clearer guidance if project files are misplaced.
+
 ---
 
 ## 5) MongoDB Compass Setup Guide
