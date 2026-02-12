@@ -97,5 +97,3 @@ router.get('/admin/orders', ensureAuth, ah(async (req, res) => {
 }));
 
 module.exports = router;
-
-module.exports = router;
